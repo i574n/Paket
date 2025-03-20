@@ -153,6 +153,8 @@ type Net8WindowsVersion =
 
 type Net9WindowsVersion = Net8WindowsVersion
 
+type Net10WindowsVersion = Net9WindowsVersion
+
 [<RequireQualifiedAccess>]
 type Net5Os =
     | Android
@@ -255,6 +257,8 @@ type Net8Os =
          
 type Net9Os = Net8Os         
 
+type Net10Os = Net9Os
+
 [<RequireQualifiedAccess>]
 /// The Framework version.
 // Each time a new version is added NuGetPackageCache.CurrentCacheVersion should be bumped.
@@ -284,6 +288,7 @@ type FrameworkVersion =
     | V7
     | V8
     | V9
+    | V10
     override this.ToString() =
         match this with
         | V1        -> "v1.0"
@@ -311,6 +316,7 @@ type FrameworkVersion =
         | V7        -> "v7.0"
         | V8        -> "v8.0"
         | V9        -> "v9.0"
+        | V10       -> "v10.0"
 
     member this.ShortString() =
         match this with
@@ -339,6 +345,7 @@ type FrameworkVersion =
         | FrameworkVersion.V7 -> "7.0"
         | FrameworkVersion.V8 -> "8.0"
         | FrameworkVersion.V9 -> "9.0"
+        | FrameworkVersion.V10 -> "10.0"
 
     static member TryParse s =
         match s with
@@ -367,6 +374,7 @@ type FrameworkVersion =
         | "7" -> Some FrameworkVersion.V7
         | "8" -> Some FrameworkVersion.V8
         | "9" -> Some FrameworkVersion.V9
+        | "10" -> Some FrameworkVersion.V10
         | _ -> None
 
 [<RequireQualifiedAccess>]
@@ -808,6 +816,8 @@ type FrameworkIdentifier =
     | DotNet8Windows of Net8WindowsVersion
     | DotNet9WithOs of Net9Os
     | DotNet9Windows of Net9WindowsVersion
+    | DotNet10WithOs of Net10Os
+    | DotNet10Windows of Net10WindowsVersion
     | UAP of UAPVersion
     | DotNetStandard of DotNetStandardVersion
     | DotNetCoreApp of DotNetCoreAppVersion
@@ -831,6 +841,8 @@ type FrameworkIdentifier =
     override x.ToString() =
         match x with
         | DotNetFramework v -> "net" + v.ShortString()
+        | DotNet10WithOs o  -> "net10.0-" + o.ToString()
+        | DotNet10Windows v -> "net10.0-windows" + v.ToString()
         | DotNet9WithOs o  -> "net9.0-" + o.ToString()
         | DotNet9Windows v -> "net9.0-windows" + v.ToString()
         | DotNet8WithOs o  -> "net8.0-" + o.ToString()
@@ -946,6 +958,7 @@ type FrameworkIdentifier =
         | DotNetFramework FrameworkVersion.V7 -> [ DotNetFramework FrameworkVersion.V6 ]
         | DotNetFramework FrameworkVersion.V8 -> [ DotNetFramework FrameworkVersion.V7 ]
         | DotNetFramework FrameworkVersion.V9 -> [ DotNetFramework FrameworkVersion.V8 ]
+        | DotNetFramework FrameworkVersion.V10 -> [ DotNetFramework FrameworkVersion.V9 ]
         | DotNet5WithOs Net5Os.Android -> [ DotNetFramework FrameworkVersion.V5; MonoAndroid MonoAndroidVersion.V12 ]
         | DotNet5WithOs Net5Os.IOs -> [ DotNetFramework FrameworkVersion.V5; XamariniOS ]
         | DotNet5WithOs Net5Os.MacOs -> [ DotNetFramework FrameworkVersion.V5; XamarinMac ]
@@ -972,11 +985,16 @@ type FrameworkIdentifier =
         | DotNet8WithOs  Net8Os.TvOs    -> [ DotNetFramework FrameworkVersion.V8; XamarinTV ]
         | DotNet8WithOs  Net8Os.WatchOs -> [ DotNetFramework FrameworkVersion.V8; XamarinWatch ]
         // remark: for now, os versions for net 9 is alias to 8
-        | DotNet9WithOs  Net8Os.Android -> [ DotNetFramework FrameworkVersion.V9; MonoAndroid MonoAndroidVersion.V12 ]
-        | DotNet9WithOs  Net8Os.IOs     -> [ DotNetFramework FrameworkVersion.V9; XamariniOS ]
-        | DotNet9WithOs  Net8Os.MacOs   -> [ DotNetFramework FrameworkVersion.V9; XamarinMac ]
-        | DotNet9WithOs  Net8Os.TvOs    -> [ DotNetFramework FrameworkVersion.V9; XamarinTV ]
-        | DotNet9WithOs  Net8Os.WatchOs -> [ DotNetFramework FrameworkVersion.V9; XamarinWatch ]
+        | DotNet9WithOs  Net9Os.Android -> [ DotNetFramework FrameworkVersion.V9; MonoAndroid MonoAndroidVersion.V12 ]
+        | DotNet9WithOs  Net9Os.IOs     -> [ DotNetFramework FrameworkVersion.V9; XamariniOS ]
+        | DotNet9WithOs  Net9Os.MacOs   -> [ DotNetFramework FrameworkVersion.V9; XamarinMac ]
+        | DotNet9WithOs  Net9Os.TvOs    -> [ DotNetFramework FrameworkVersion.V9; XamarinTV ]
+        | DotNet9WithOs  Net9Os.WatchOs -> [ DotNetFramework FrameworkVersion.V9; XamarinWatch ]
+        | DotNet10WithOs Net10Os.Android -> [ DotNetFramework FrameworkVersion.V10; MonoAndroid MonoAndroidVersion.V12 ]
+        | DotNet10WithOs Net10Os.IOs     -> [ DotNetFramework FrameworkVersion.V10; XamariniOS ]
+        | DotNet10WithOs Net10Os.MacOs   -> [ DotNetFramework FrameworkVersion.V10; XamarinMac ]
+        | DotNet10WithOs Net10Os.TvOs    -> [ DotNetFramework FrameworkVersion.V10; XamarinTV ]
+        | DotNet10WithOs Net10Os.WatchOs -> [ DotNetFramework FrameworkVersion.V10; XamarinWatch ]
         | DotNet6Windows Net6WindowsVersion.V7_0          -> [ DotNetFramework FrameworkVersion.V6 ]
         | DotNet6Windows Net6WindowsVersion.V8_0          -> [ DotNetFramework FrameworkVersion.V6; DotNet6Windows Net6WindowsVersion.V7_0 ]
         | DotNet6Windows Net6WindowsVersion.V10_0_17763_0 -> [ DotNetFramework FrameworkVersion.V6; DotNet6Windows Net6WindowsVersion.V8_0 ]
@@ -993,11 +1011,16 @@ type FrameworkIdentifier =
         | DotNet8Windows Net8WindowsVersion.V10_0_18362_0 -> [ DotNetFramework FrameworkVersion.V8; DotNet8Windows Net8WindowsVersion.V10_0_17763_0 ]
         | DotNet8Windows Net8WindowsVersion.V10_0_19041_0 -> [ DotNetFramework FrameworkVersion.V8; DotNet8Windows Net8WindowsVersion.V10_0_18362_0 ]
         // remark: for now, windows version for net 9 is alias to 8
-        | DotNet9Windows Net8WindowsVersion.V7_0          -> [ DotNetFramework FrameworkVersion.V8; ]
-        | DotNet9Windows Net8WindowsVersion.V8_0          -> [ DotNetFramework FrameworkVersion.V8; DotNet9Windows Net8WindowsVersion.V7_0]
-        | DotNet9Windows Net8WindowsVersion.V10_0_17763_0 -> [ DotNetFramework FrameworkVersion.V8; DotNet9Windows Net8WindowsVersion.V8_0]
-        | DotNet9Windows Net8WindowsVersion.V10_0_18362_0 -> [ DotNetFramework FrameworkVersion.V8; DotNet9Windows Net8WindowsVersion.V10_0_17763_0 ]
-        | DotNet9Windows Net8WindowsVersion.V10_0_19041_0 -> [ DotNetFramework FrameworkVersion.V8; DotNet9Windows Net8WindowsVersion.V10_0_18362_0 ]
+        | DotNet9Windows Net9WindowsVersion.V7_0          -> [ DotNetFramework FrameworkVersion.V9; ]
+        | DotNet9Windows Net9WindowsVersion.V8_0          -> [ DotNetFramework FrameworkVersion.V9; DotNet9Windows Net8WindowsVersion.V7_0]
+        | DotNet9Windows Net9WindowsVersion.V10_0_17763_0 -> [ DotNetFramework FrameworkVersion.V9; DotNet9Windows Net8WindowsVersion.V8_0]
+        | DotNet9Windows Net9WindowsVersion.V10_0_18362_0 -> [ DotNetFramework FrameworkVersion.V9; DotNet9Windows Net8WindowsVersion.V10_0_17763_0 ]
+        | DotNet9Windows Net9WindowsVersion.V10_0_19041_0 -> [ DotNetFramework FrameworkVersion.V9; DotNet9Windows Net8WindowsVersion.V10_0_18362_0 ]
+        | DotNet10Windows Net10WindowsVersion.V7_0          -> [ DotNetFramework FrameworkVersion.V10; ]
+        | DotNet10Windows Net10WindowsVersion.V8_0          -> [ DotNetFramework FrameworkVersion.V10; DotNet10Windows Net10WindowsVersion.V7_0]
+        | DotNet10Windows Net10WindowsVersion.V10_0_17763_0 -> [ DotNetFramework FrameworkVersion.V10; DotNet10Windows Net10WindowsVersion.V8_0]
+        | DotNet10Windows Net10WindowsVersion.V10_0_18362_0 -> [ DotNetFramework FrameworkVersion.V10; DotNet10Windows Net10WindowsVersion.V10_0_17763_0 ]
+        | DotNet10Windows Net10WindowsVersion.V10_0_19041_0 -> [ DotNetFramework FrameworkVersion.V10; DotNet10Windows Net10WindowsVersion.V10_0_18362_0 ]
         | DotNetStandard DotNetStandardVersion.V1_0 -> [  ]
         | DotNetStandard DotNetStandardVersion.V1_1 -> [ DotNetStandard DotNetStandardVersion.V1_0 ]
         | DotNetStandard DotNetStandardVersion.V1_2 -> [ DotNetStandard DotNetStandardVersion.V1_1 ]
@@ -1560,6 +1583,7 @@ module KnownTargetProfiles =
         FrameworkVersion.V7
         FrameworkVersion.V8
         FrameworkVersion.V9
+        FrameworkVersion.V10
     ]
 
     let DotNetFrameworkIdentifiers =

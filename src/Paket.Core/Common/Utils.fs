@@ -69,26 +69,19 @@ type MemoizeAsyncExResult<'TResult, 'TCached> =
 let internal memoizeAsyncEx (f: 'iext -> 'i -> Async<'o * 'oext>) =
     let cache = ConcurrentDictionary<'i, Task<'o>>()
     let handle (ex:'iext) (x:'i) : MemoizeAsyncExResult<'oext, 'o> =
-        let mutable tcs_result = null
-        let task_cached = cache.GetOrAdd(x, fun x ->
-            tcs_result <- TaskCompletionSource()
-            let tcs = TaskCompletionSource()
-
-            Async.Start (async {
-                try
-                    let! o, oext = f ex x
-                    tcs.SetResult o
-                    tcs_result.SetResult (o, oext)
-                with
-                  exn ->
-                    tcs.SetException exn
-                    tcs_result.SetException exn
+        let mutable tcs_result : Task<'o * 'oext> = null
+        let mutable tcs : Task<'o> = null
+        let task_cached =
+            cache.GetOrAdd(x, task {
+                let! o, oext = f ex x
+                tcs <- Task.FromResult o
+                tcs_result <- Task.FromResult (o, oext)
+                return o
             })
 
-            tcs.Task)
         // if this was the first call for the key, then tcs_result was set inside 'cache.GetOrAdd'
         if tcs_result <> null then
-            FirstCall tcs_result.Task
+            FirstCall tcs_result
         else
             SubsequentCall task_cached
     handle
@@ -213,7 +206,7 @@ let getFileEncoding path =
     use fs = new FileStream (path, FileMode.Open, FileAccess.Read)
     fs.Read (bom, 0, 4) |> ignore
     match bom with
-    | [| 0x2buy ; 0x2fuy ; 0x76uy ; _      |] -> Encoding.UTF7
+    | [| 0x2buy ; 0x2fuy ; 0x76uy ; _      |] -> Encoding.UTF8
     | [| 0xefuy ; 0xbbuy ; 0xbfuy ; _      |] -> Encoding.UTF8
     | [| 0xffuy ; 0xfeuy ; _      ; _      |] -> Encoding.Unicode //UTF-16LE
     | [| 0xfeuy ; 0xffuy ; _      ; _      |] -> Encoding.BigEndianUnicode //UTF-16BE
@@ -619,7 +612,7 @@ module String =
     let inline trim (text:string) = text.Trim()
     let inline trimChars (chs: char[]) (text:string) = text.Trim chs
     let inline trimStart (pre: char[]) (text:string) = text.TrimStart pre
-    let inline split sep (text:string) = text.Split sep
+    let inline split (sep : char) (text:string) = text.Split sep
 
 // MonadPlus - "or else"
 let inline (++) x y =
@@ -652,18 +645,18 @@ let parseKeyValuePairs (s:string) : Dictionary<string,string> =
                     s.Contains(":")
 
             if x = '"' then
-                quoted := not !quoted
-            elif x = ',' && not !quoted && restHasKey() then
+                quoted.Value <- not quoted.Value
+            elif x = ',' && not quoted.Value && restHasKey() then
                 add (lastKey.ToString()) (lastValue.ToString())
                 lastKey.Clear() |> ignore
                 lastValue.Clear() |> ignore
-                isKey := true
-            elif x = ':' && not !quoted then
-                if not !isKey then
+                isKey.Value <- true
+            elif x = ':' && not quoted.Value then
+                if not isKey.Value then
                     failwithf "invalid delimiter at position %d" pos
-                isKey := false
+                isKey.Value <- false
             else
-                if !isKey then
+                if isKey.Value then
                     lastKey.Append(x) |> ignore
                 else
                     lastValue.Append(x) |> ignore
@@ -879,7 +872,7 @@ module ObservableExtensions =
 
 type StringBuilder with
 
-    member self.AddLine text =
+    member self.AddLine (text : string) =
         self.AppendLine text |> ignore
 
     member self.AppendLinef text = Printf.kprintf self.AppendLine text

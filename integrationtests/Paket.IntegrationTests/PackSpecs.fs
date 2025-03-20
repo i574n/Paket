@@ -1027,7 +1027,7 @@ let ``#2883 writes warning for missing direct dependencies``() =
     use __ = dispose
 
     match messages
-          |> String.split [|'\n'|]
+          |> String.split '\n'
           |> Seq.tryFind (fun msg -> msg.Contains "Microsoft.Extensions.DependencyInjection" && msg.Contains "is this package in your paket.dependencies file?") with
     | Some _ -> ()
     | None -> failwithf "Expected paket to warn user about missing top-level reference while packaging dependencies"

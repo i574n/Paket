@@ -62,7 +62,7 @@ let ``#3030-2 interpret all versions in nuget catalog`` serviceUrl =
     for package in catalog.Packages do
         let name = package.Key
         for original in package.Value do
-            let version = original |> String.split [|'!'|] |> Array.head
+            let version = original |> String.split '!' |> Array.head
             let semVer = 
                 try
                     Some (SemVer.Parse(version))

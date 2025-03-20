@@ -273,8 +273,8 @@ module internal NupkgWriter =
         let entries = System.Collections.Generic.List<_>()
 
         let fixRelativePath (p:string) =
-            let isWinDrive = Regex(@"^\w:\\.*", RegexOptions.Compiled).IsMatch
-            let isNixRoot = Regex(@"^\/.*", RegexOptions.Compiled).IsMatch
+            let isWinDrive (x : string) = Regex(@"^\w:\\.*", RegexOptions.Compiled).IsMatch x
+            let isNixRoot (x : string) = Regex(@"^\/.*", RegexOptions.Compiled).IsMatch x
 
             let prepend,path =
                 match p with
@@ -445,5 +445,3 @@ module NuspecExtensions =
                 // TODO - this might be the point to add in some info from the
                 // lock and dependencies fiels that weren't in the project file
                 name + ".nuspec", nuspecDoc (projectInfo.ToCoreInfo name, optionalInfo )
-
-

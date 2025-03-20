@@ -4,7 +4,7 @@ storage: none
 content: none
 
 nuget Newtonsoft.Json >= 10.0.3 redirects: force
-nuget Argu >= 5.1.0
+nuget Argu >= 6.2.5
 nuget FSharp.Core >= 6.0.3 redirects: force
 nuget Chessie >= 0.6
 nuget Mono.Cecil ~> 0.11.1
@@ -48,7 +48,7 @@ group Build
   nuget FSharp.Formatting prerelease
   nuget System.ValueTuple
   nuget Microsoft.AspNet.Razor
-  nuget ILRepack
+  nuget ILRepack >= 2.0.40
 
   github fsharp/FAKE modules/Octokit/Octokit.fsx
 

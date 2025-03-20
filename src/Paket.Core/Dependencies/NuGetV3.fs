@@ -183,8 +183,6 @@ let calculateNuGet2Path(nugetUrl:string) =
     match nugetUrl.TrimEnd([|'/'|]) with
     | "http://api.nuget.org/v3/index.json" -> Some "http://nuget.org/api/v2"
     | "https://api.nuget.org/v3/index.json" -> Some "https://nuget.org/api/v2"
-    | "http://api.nuget.org/v3/index.json" -> Some "http://www.nuget.org/api/v2"
-    | "https://api.nuget.org/v3/index.json" -> Some "https://www.nuget.org/api/v2"
     | url when url.EndsWith("/nuget/v3/index.json") -> Some (url.Replace("/nuget/v3/index.json","/nuget/v2"))
     | url when url.EndsWith("/api/v3/index.json") && url.Contains("visualstudio.com") -> Some (url.Replace("/api/v3/index.json",""))
     | url when url.EndsWith("/api/v3/index.json") && url.Contains("myget.org") -> Some (url.Replace("/api/v3/index.json",""))
@@ -301,7 +299,7 @@ let private getCatalogPage auth (item:NugetV3CatalogIndexItem)(basePath:String) 
     let pageDirectory = getCatalogPageDirectory(basePath,item.Id)
     let pageFileNameOnly =
         item.Id |> WebUtility.UrlDecode
-        |> String.split[|'/'|] |> Array.last
+        |> String.split '/' |> Array.last
         |> Path.GetFileNameWithoutExtension
     let pageFileName = Path.Combine(pageDirectory.FullName, pageFileNameOnly)
     let pageFileData = getPageFileContent pageFileName
@@ -340,7 +338,7 @@ type NugetV3PackageCatalog = {
 let private semVerOrder versions =
     let getSemVer original =
         let parts =
-            original |> String.split[|'!'|]
+            original |> String.split '!'
         try
             SemVer.Parse(parts.[0])
         with

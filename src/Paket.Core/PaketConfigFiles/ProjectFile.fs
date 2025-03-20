@@ -2077,7 +2077,7 @@ type ProjectFile with
 
         let tryBool (s: string) = Boolean.TryParse s |> function true, value -> value | _ -> false
 
-        let splitString = String.split[|';'|] >> Array.map (fun x -> x.Trim()) >> List.ofArray
+        let splitString = String.split ';' >> Array.map (fun x -> x.Trim()) >> List.ofArray
 
         let coreInfo : ProjectCoreInfo = {
             Id = prop "id"

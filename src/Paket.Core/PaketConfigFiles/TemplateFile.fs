@@ -358,7 +358,7 @@ module internal TemplateFile =
 
                     | _ -> failwithf "The template file %s contains invalid placeholder %A" fileName line
 
-                let versionParts = (sourceVersion.AsString |> String.split [|'-'; '+'|]).[0] |> String.split [|'.'|]
+                let versionParts = (sourceVersion.AsString.Split [|'-'; '+'|]).[0].Split [|'.'|]
                 let segmentCount =
                     match m.Groups.["spec"] with
                     | spec when spec.Success ->
@@ -594,7 +594,7 @@ module internal TemplateFile =
                           match Map.tryFind "authors" map with
                           | None -> None
                           | Some s ->
-                            String.split [|','|] s
+                            String.split ',' s
                             |> Array.map String.trim
                             |> Array.toList |> Some
                       Description = Map.tryFind "description" map
